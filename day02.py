@@ -10,7 +10,7 @@ from common import parse_file
 # ####################################
 # --------------  Main  --------------
 P1_DATFILE = r"data/d2p1.txt" #r"data/d2p1_ex.txt"
-P2_DATFILE = r"data/d2p1_ex.txt"
+P2_DATFILE = P1_DATFILE #r"data/d2p1_ex.txt"
 
 def main(argv=None):
     if argv is None:
@@ -39,7 +39,7 @@ def main(argv=None):
 
     # Day 2, part 2.
     d2p2 = do_d2p2(P2_DATFILE)
-    logging.info(f"Part 2: Secret code is {d2p2}") # 
+    logging.info(f"Part 2: Secret code is {d2p2}") # 17298174201
 
     print("\n\nEnd")
 
@@ -66,6 +66,8 @@ def find_invalid_ids(
     """
     Invalid IDs are those that are that contain a duplicated sequence of digits
     such as: 11, 1212, 123123, etc.
+    If check_subs is True, also consider other repeated substrings in the id such as:
+    121212, 157415741574, etc.
     """
     invalid_ids = []
     r_lo, r_hi = id_range
@@ -76,10 +78,7 @@ def find_invalid_ids(
 
         if id_len == 1:
             continue
-        if id_len % 2 != 0:
-            if check_subs:
-                if all(i == id_str[0] for i in id_str):
-                    invalid_ids.append(id_num)
+        if id_len % 2 != 0 and not check_subs:
             continue
 
         half_len = id_len // 2
@@ -90,6 +89,10 @@ def find_invalid_ids(
             continue
 
         if check_subs:
+            if all(i == id_str[0] for i in id_str):
+                invalid_ids.append(id_num)
+                continue
+
             for n in range(2, half_len):
                 if id_len % n != 0:
                     continue
@@ -121,7 +124,7 @@ def do_d2p2(datafile: str) -> int:
     invalid_id_sum = 0
     for id_range in parsed_data:
         invalid_ids = find_invalid_ids(id_range, True)
-        logging.info("Invalid IDs in range %s: %s", id_range, invalid_ids)
+        logging.debug("Invalid IDs in range %s: %s", id_range, invalid_ids)
         invalid_id_sum += sum(invalid_ids)
 
     return invalid_id_sum
