@@ -70,7 +70,6 @@ def do_d3p1(datafile: str) -> int:
 
     total_joltage = 0
     for bank in raw_data:
-        #joltage = get_joltage(bank)
         joltage = get_joltage(bank)
         logging.debug("Bank: %s, Joltage: %d", bank, joltage)
         total_joltage += joltage
