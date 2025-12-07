@@ -35,7 +35,7 @@ def main(argv=None):
 
     # Day 3, part 1.
     d3p1 = do_d3p1(P1_DATFILE)
-    logging.info(f"Part 1: {d3p1}") # 
+    logging.info(f"Part 1: {d3p1}") # 17343
 
     # Day 3, part 2.
     # d3p2 = do_d3p2(P2_DATFILE)
@@ -47,28 +47,31 @@ def main(argv=None):
 # ####################################
 # --------------  Util  --------------
 def get_joltage(bank_info: str, nmax:int = 2) -> int:
-    max_vals = ""
+    """
+    Find the max and then then keep finding the max of the remaining digits in the
+    substring starting at index max.
+    """
     bank_info_list = [n for n in bank_info]
-    max_val_ints = []
-    # First, get the nmax largest values in the bank info.
+    joltage_str = ""
+    max_val = max(int(n) for n in bank_info_list)
+    logging.debug("Initial max joltage: %d", max_val)
+
+    # Check for pathological case where the max is at the end of the string.
+    if bank_info_list.index(str(max_val)) == len(bank_info_list) - 1:
+        max_val = max(int(n) for n in bank_info_list[:-1])
+        logging.debug("Adjusted initial max joltage: %d", max_val)
+
     for _ in range(nmax):
-        max_val = max(int(i) for i in bank_info_list)
-        max_val_ints.append(max_val)
-        bank_info_list.remove(str(max_val))
+        joltage_str += str(max_val)
+        # Find the index of max_val in bank_info_list.
+        max_idx = bank_info_list.index(str(max_val))
+        logging.debug("Max joltage: %d at index %d", max_val, max_idx)
+        # Remove all digits before and including max_idx from bank_info_list and bank_info_ints.
+        bank_info_list = bank_info_list[max_idx + 1 :]
+        if bank_info_list:
+            max_val = max(int(n) for n in bank_info_list)
 
-    # Then, run through the bank info and build the max_vals string.
-    for b in bank_info:
-        if int(b) in max_val_ints:
-            max_vals += b
-            max_val_ints.remove(int(b))
-        if len(max_vals) >= nmax:
-            break
-
-    # for _ in range(nmax):
-    #     max_val = max(int(i) for i in bank_info_list)
-    #     max_vals += str(max_val)
-    #     bank_info_list.remove(str(max_val))
-    return int(max_vals)
+    return int(joltage_str)
 
 
 def do_d3p1(datafile: str) -> int:
