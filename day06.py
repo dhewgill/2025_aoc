@@ -51,11 +51,12 @@ def main(argv=None):
 def parse_input(raw_data: list[str]) -> list[list[int|str]]:
     problems = []
     for d in raw_data:
-        datalist = d.split()
-        if (datalist[0]).isnumeric():
-            problems.append([int(x) for x in datalist])
-        else:
-            problems.append(datalist)
+        problems.append(d.split())
+        # datalist = d.split()
+        # if (datalist[0]).isnumeric():
+        #     problems.append([int(x) for x in datalist])
+        # else:
+        #     problems.append(datalist)
     return problems
 
 
@@ -76,7 +77,7 @@ def do_d6p1(datafile: str) -> int:
         elif op == operator.mul:
             problem_res = 1
         for val in problem[:-1]:
-            problem_res = op(problem_res, val)
+            problem_res = op(problem_res, int(val))
         problem_sum += problem_res
         logging.debug("Problem: %s = %d", problem, problem_res)
 
