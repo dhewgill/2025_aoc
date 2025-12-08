@@ -35,7 +35,7 @@ def main(argv=None):
 
     # Day 4, part 1.
     d4p1 = do_d4p1(P1_DATFILE)
-    logging.info(f"Part 1: {d4p1}") # 
+    logging.info(f"Part 1: {d4p1}") # 1578
 
     # Day 4, part 2.
     d4p2 = do_d4p2(P2_DATFILE)
@@ -52,7 +52,7 @@ def print_grid(grid: list[str]) -> None:
         print(row)
 
 
-def count_neigbbours(grid: list[str], row:int, col:int, occupied:str = "@") -> int:
+def count_neighbours(grid: list[str], row:int, col:int, occupied:str = "@") -> int:
     n_rows = len(grid)
     n_cols = len(grid[0])
     deltas = [(-1, -1), (-1, 0), (-1, 1),
@@ -89,7 +89,7 @@ def do_d4p1(datafile: str) -> int:
         for col in range(n_cols):
             if row[col] != "@":
                 continue
-            n_occupied = count_neigbbours(grid, row_num, col)
+            n_occupied = count_neighbours(grid, row_num, col)
             logging.debug("Cell (%d, %d) has %d occupied neighbours", row_num, col, n_occupied)
             if n_occupied < 4:
                 num_moveable += 1
