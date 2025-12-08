@@ -39,7 +39,7 @@ def main(argv=None):
 
     # Day 4, part 2.
     d4p2 = do_d4p2(P2_DATFILE)
-    logging.info(f"Part 2: {d4p2}") # 
+    logging.info(f"Part 2: {d4p2}") # 10132
 
     print("\n\nEnd")
 
@@ -50,6 +50,13 @@ def print_grid(grid: list[str]) -> None:
     logging.info("Grid:")
     for row in grid:
         print(row)
+
+
+def parse_input(raw_data: list[str]) -> list[str]:
+    parsed_data = []
+    for line in raw_data:
+        parsed_data.append([l for l in line.strip()])
+    return parsed_data
 
 
 def count_neighbours(grid: list[str], row:int, col:int, occupied:str = "@") -> int:
@@ -67,13 +74,6 @@ def count_neighbours(grid: list[str], row:int, col:int, occupied:str = "@") -> i
                 n_occupied += 1
 
     return n_occupied
-
-
-def parse_input(raw_data: list[str]) -> list[str]:
-    parsed_data = []
-    for line in raw_data:
-        parsed_data.append(line.strip())
-    return parsed_data
 
 
 def do_d4p1(datafile: str) -> int:
@@ -100,7 +100,25 @@ def do_d4p2(datafile: str) -> int:
     raw_data = parse_file(datafile)
     logging.debug("Raw data: %s", raw_data)
 
-    return None
+    grid = parse_input(raw_data)
+
+    n_cols = len(grid[0]) # Assume all rows same length.
+    n_removed = 0
+    while True:
+        n_removed_this_iter = 0
+        for row_num, row in enumerate(grid):
+            for col in range(n_cols):
+                if row[col] != "@":
+                    continue
+                n_occupied = count_neighbours(grid, row_num, col)
+                logging.debug("Cell (%d, %d) has %d occupied neighbours", row_num, col, n_occupied)
+                if n_occupied < 4:
+                    n_removed_this_iter += 1
+                    grid[row_num][col] = "."
+        n_removed += n_removed_this_iter
+        if n_removed_this_iter == 0:
+            break
+    return n_removed
 
 
 # ####################################
