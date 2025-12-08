@@ -10,7 +10,7 @@ from common import parse_file
 
 # ####################################
 # --------------  Main  --------------
-P1_DATFILE = r"data/d6p1.txt" #r"data/d6p1_ex.txt"
+P1_DATFILE = r"data/d6p1_ex.txt" #r"data/d6p1_ex.txt"
 P2_DATFILE =  P1_DATFILE #r"data/d6p1_ex.txt"
 
 def main(argv=None):
@@ -64,7 +64,7 @@ def do_d6p1(datafile: str) -> int:
     logging.debug("Raw data: %s", raw_data)
 
     parsed_input = parse_input(raw_data)
-    logging.info("Parsed input: %s", parsed_input)
+    logging.debug("Parsed input: %s", parsed_input)
 
     op_key = {"+": operator.add, "*": operator.mul}
     problem_sum = 0
@@ -78,7 +78,7 @@ def do_d6p1(datafile: str) -> int:
         for val in problem[:-1]:
             problem_res = op(problem_res, val)
         problem_sum += problem_res
-        logging.info("Problem: %s = %d", problem, problem_res)
+        logging.debug("Problem: %s = %d", problem, problem_res)
 
     return problem_sum
 
@@ -87,7 +87,37 @@ def do_d6p2(datafile: str) -> int:
     raw_data = parse_file(datafile)
     logging.debug("Raw data: %s", raw_data)
 
-    return None
+    parsed_input = parse_input(raw_data)
+    logging.info("Parsed input: %s", parsed_input)
+
+    op_key = {"+": operator.add, "*": operator.mul}
+    problem_sum = 0
+
+    transposed_problems = list(zip(*parsed_input))
+    for problem in transposed_problems:
+        op = op_key[problem[-1]]
+        if op == operator.add:
+            problem_res = 0
+        elif op == operator.mul:
+            problem_res = 1
+        # Re-stringify the numbers.
+        str_problem = [str(x) for x in problem[:-1]]
+        # Pad out the strings in number format with spaces to align them.
+        max_len = max(len(s) for s in str_problem)
+        padded_problem = [(s[::-1]).rjust(max_len) for s in str_problem]
+        new_numbers = []
+        for i in range(max_len):
+            this_digit = ""
+            for pp in padded_problem:
+                this_digit += pp[i]
+            new_numbers.append(int(this_digit))
+        logging.info("Problem: %s -> New numbers: %s", padded_problem, new_numbers)
+        for val in new_numbers:
+            problem_res = op(problem_res, val)
+
+        problem_sum += problem_res
+
+    return problem_sum
 
 
 # ####################################
