@@ -87,6 +87,7 @@ def do_d6p2(datafile: str) -> int:
     raw_data = parse_file(datafile)
     logging.debug("Raw data: %s", raw_data)
 
+    # Will need to parse to string and preserve the original left/right justification.
     parsed_input = parse_input(raw_data)
     logging.info("Parsed input: %s", parsed_input)
 
