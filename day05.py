@@ -39,14 +39,15 @@ def main(argv=None):
 
     # Day 4, part 2.
     d5p2 = do_d5p2(P2_DATFILE)
-    logging.info(f"Part 2: {d5p2}") # 
+    logging.info(f"Part 2: {d5p2}") # 344260049617193
+
 
     print("\n\nEnd")
 
 
 # ####################################
 # --------------  Util  --------------
-def parse_input(raw_data: list[str]) -> tuple[list[object], list[int]]:
+def parse_input(raw_data: list[str]) -> tuple[list[range], list[int]]:
     parsed_ranges = []
     ingredients = []
     parse_ingredients = False
@@ -61,6 +62,47 @@ def parse_input(raw_data: list[str]) -> tuple[list[object], list[int]]:
             range_start, range_end = range_parts
             parsed_ranges.append(range(int(range_start), int(range_end)+1))
     return (parsed_ranges, ingredients)
+
+
+def get_overlap_range(r1: range, r2: range) -> range | None:
+    start = max(r1.start, r2.start)
+    end = min(r1.stop, r2.stop)
+    if start < end:
+        return range(start, end)
+    return None
+
+
+def consolidate(r1: range, r2: range) -> range:
+    """
+    Consolidate two ranges known to overlap.
+    """
+    new_start = min(r1.start, r2.start)
+    new_end = max(r1.stop, r2.stop)
+    return range(new_start, new_end)
+
+
+def consolidate_ranges(ranges: list[range]) -> list[range]:
+    """
+    Consolidate a list of ranges that may have overlaps into a list of non-overlapping ranges.
+    """
+    sorted_ranges = sorted(ranges, key=lambda r: r.start)
+    consolidated = []
+    for r in sorted_ranges:
+        if not consolidated:
+            consolidated.append(r)
+            continue
+
+        last_r = consolidated[-1]
+        overlap_range = get_overlap_range(last_r, r)
+        if overlap_range is not None:
+            # Merge ranges.
+            new_range = consolidate(last_r, r)
+            consolidated[-1] = new_range
+
+        else:
+            consolidated.append(r)
+
+    return consolidated
 
 
 def do_d5p1(datafile: str) -> int:
@@ -83,7 +125,12 @@ def do_d5p2(datafile: str) -> int:
     raw_data = parse_file(datafile)
     logging.debug("Raw data: %s", raw_data)
 
-    return None
+    ranges, _ = parse_input(raw_data)
+    logging.debug("Parsed ranges: %s", ranges)
+
+    consolidated_ranges = consolidate_ranges(ranges)
+    logging.debug("Consolidated ranges: %s", consolidated_ranges)
+    return sum(len(r) for r in consolidated_ranges)
 
 
 # ####################################
