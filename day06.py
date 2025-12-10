@@ -10,7 +10,7 @@ from common import parse_file
 
 # ####################################
 # --------------  Main  --------------
-P1_DATFILE = r"data/d6p1_ex.txt" #r"data/d6p1_ex.txt"
+P1_DATFILE = r"data/d6p1.txt" #r"data/d6p1_ex.txt"
 P2_DATFILE =  P1_DATFILE #r"data/d6p1_ex.txt"
 
 def main(argv=None):
@@ -48,16 +48,51 @@ def main(argv=None):
 
 # ####################################
 # --------------  Util  --------------
-def parse_input(raw_data: list[str]) -> list[list[int|str]]:
+def parse_input(raw_data: list[str], split_line:bool=True) -> list[list[int|str]]:
     problems = []
     for d in raw_data:
-        problems.append(d.split())
-        # datalist = d.split()
-        # if (datalist[0]).isnumeric():
-        #     problems.append([int(x) for x in datalist])
-        # else:
-        #     problems.append(datalist)
+        if split_line:
+            problems.append(d.split())
+        else:
+            problems.append(d)
     return problems
+
+
+def split_to_problems(probs: list[str]) -> list[list[str]]:
+    problem_list = []
+
+    max_cols = len(probs[0])
+    prob_start_index = 0
+    for col in range(max_cols):
+        if all(p[col] == " " for p in probs):
+            # We've reached the end of a problem.
+            problem_list.append(tuple(p[prob_start_index:col] for p in probs))
+            prob_start_index = col + 1
+
+    # Add the last problem.
+    problem_list.append(tuple(p[prob_start_index:] for p in probs))
+    return problem_list
+
+
+def compute_problem_value(problem: list[str], op_func) -> int:
+    if op_func == operator.add:
+        problem_res = 0
+    elif op_func == operator.mul:
+        problem_res = 1
+
+    max_cols = len(problem[0])
+    for col in range(max_cols-1, -1, -1): # Count backwards; right to left.
+        this_val = ""
+        vals = []
+        for p in problem: # Iterate by rows of the problem.
+            if p[col] != " ":
+                this_val += p[col]
+        val = int(this_val)
+        vals.append(val)
+        logging.debug("Column %d: Values: %s", col, vals)
+        problem_res = op_func(problem_res, val)
+
+    return problem_res
 
 
 def do_d6p1(datafile: str) -> int:
@@ -89,35 +124,22 @@ def do_d6p2(datafile: str) -> int:
     logging.debug("Raw data: %s", raw_data)
 
     # Will need to parse to string and preserve the original left/right justification.
-    parsed_input = parse_input(raw_data)
-    logging.info("Parsed input: %s", parsed_input)
+    parsed_input = parse_input(raw_data, False)
+    logging.debug("Parsed input: %s", parsed_input)
 
     op_key = {"+": operator.add, "*": operator.mul}
+    op_line = parsed_input.pop()
+    ops = op_line.split()
+    logging.debug("Operators: %s", ops)
     problem_sum = 0
 
-    transposed_problems = list(zip(*parsed_input))
-    for problem in transposed_problems:
-        op = op_key[problem[-1]]
-        if op == operator.add:
-            problem_res = 0
-        elif op == operator.mul:
-            problem_res = 1
-        # Re-stringify the numbers.
-        str_problem = [str(x) for x in problem[:-1]]
-        # Pad out the strings in number format with spaces to align them.
-        max_len = max(len(s) for s in str_problem)
-        padded_problem = [(s[::-1]).rjust(max_len) for s in str_problem]
-        new_numbers = []
-        for i in range(max_len):
-            this_digit = ""
-            for pp in padded_problem:
-                this_digit += pp[i]
-            new_numbers.append(int(this_digit))
-        logging.info("Problem: %s -> New numbers: %s", padded_problem, new_numbers)
-        for val in new_numbers:
-            problem_res = op(problem_res, val)
+    probs = split_to_problems(parsed_input)
+    logging.debug("Problems: %s", probs)
 
+    for problem, op in zip(probs, ops):
+        problem_res = compute_problem_value(problem, op_key[op])
         problem_sum += problem_res
+        logging.debug("Problem: %s = %d", problem, problem_res)
 
     return problem_sum
 
