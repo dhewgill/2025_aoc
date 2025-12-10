@@ -40,7 +40,7 @@ def main(argv=None):
 
     # Part 2.
     d6p2 = do_d6p2(P2_DATFILE)
-    logging.info(f"Part 2: {d6p2}") # 
+    logging.info(f"Part 2: {d6p2}") # 11044319475191
 
 
     print("\n\nEnd")
