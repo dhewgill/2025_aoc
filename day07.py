@@ -61,7 +61,7 @@ def count_tachyon_splits(manifold: list[str]) -> int:
         if "S" in val:
             tachyon_beam_locs.add((row + 1, val.index("S")))
             continue
-        elif row == max_rows:
+        if row == max_rows:
             continue
 
         for col, _ in enumerate(val):
@@ -85,7 +85,7 @@ def do_d7p1(datafile: str) -> int:
     logging.debug("Raw data: %s", raw_data)
 
     num_splits = count_tachyon_splits(raw_data)
-    logging.info("Number of tachyon splits: %d", num_splits)
+    logging.debug("Number of tachyon splits: %d", num_splits)
 
     return num_splits
 
