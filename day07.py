@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 
 import argparse
+from functools import lru_cache
 import logging
 import sys
 
@@ -38,7 +39,7 @@ def main(argv=None):
 
     # Part 2.
     d7p2 = do_d7p2(P2_DATFILE)
-    logging.info(f"Part 2: {d7p2}") # 
+    logging.info(f"Part 2: {d7p2}") # 43560947406326
 
 
     print("\n\nEnd")
@@ -46,10 +47,6 @@ def main(argv=None):
 
 # ####################################
 # --------------  Util  --------------
-def parse_input(raw_data: list[str]) -> list[str]:
-    return
-
-
 def count_tachyon_splits(manifold: list[str]) -> int:
     # Track tachyon beams with a set storing their (row, col) locations.
     # A set is used because there may be overlapping beams.
@@ -80,6 +77,31 @@ def count_tachyon_splits(manifold: list[str]) -> int:
     return split_count
 
 
+def in_bounds(manifold: list[str], beam_loc: tuple[int, int]) -> bool:
+    row, col = beam_loc
+    return (0 <= row < len(manifold)) and (0 <= col < len(manifold[0]))
+
+
+@lru_cache()
+def count_tachyon_timelines(manifold: tuple[str], beam_loc: tuple[int, int]) -> int:
+    row, col = beam_loc
+    if row == len(manifold) - 1:
+        return 1
+
+    if manifold[row + 1][col] == "^":
+        left = (row + 1, col - 1)
+        right = (row + 1, col + 1)
+        left_count = 0
+        right_count = 0
+        if in_bounds(manifold, left):
+            left_count = count_tachyon_timelines(manifold, left)
+        if in_bounds(manifold, right):
+            right_count = count_tachyon_timelines(manifold, right)
+        return left_count + right_count
+
+    return count_tachyon_timelines(manifold, (row + 1, col))
+
+
 def do_d7p1(datafile: str) -> int:
     raw_data = parse_file(datafile)
     logging.debug("Raw data: %s", raw_data)
@@ -94,10 +116,16 @@ def do_d7p2(datafile: str) -> int:
     raw_data = parse_file(datafile)
     logging.debug("Raw data: %s", raw_data)
 
-    parsed_input = parse_input(raw_data)
-    logging.debug("Parsed input: %s", parsed_input)
+    num_timelines = 1
+    # Get the starting location of the tachyon beam.
+    for row, val in enumerate(raw_data):
+        if "S" in val:
+            beam_loc = (row + 1, val.index("S"))
+            break
+    logging.debug("Tachyon beam starting location: %s", beam_loc)
+    num_timelines = count_tachyon_timelines(tuple(r for r in raw_data), beam_loc)
 
-    return
+    return num_timelines
 
 
 # ####################################
